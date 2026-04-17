@@ -7,21 +7,16 @@ export default function Steam() {
   
   const particleCount = 40;
   
-  const [positions, scales, opacities] = useMemo(() => {
+  const [positions] = useMemo(() => {
     const pos = new Float32Array(particleCount * 3);
-    const scl = new Float32Array(particleCount);
-    const opc = new Float32Array(particleCount);
     
     for (let i = 0; i < particleCount; i++) {
       pos[i * 3] = (Math.random() - 0.5) * 0.2;
       pos[i * 3 + 1] = Math.random() * 2;
       pos[i * 3 + 2] = (Math.random() - 0.5) * 0.2;
-      
-      scl[i] = Math.random();
-      opc[i] = Math.random();
     }
     
-    return [pos, scl, opc];
+    return [pos];
   }, []);
 
   useFrame((state, delta) => {

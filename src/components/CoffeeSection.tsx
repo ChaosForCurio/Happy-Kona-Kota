@@ -2,26 +2,28 @@ import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import gsap from 'gsap';
 
+import ThreeScene from './ThreeScene';
+
 export default function CoffeeSection() {
-  const imageRef = useRef(null);
   const containerRef = useRef(null);
+  const sceneRef = useRef(null);
   const glowRef = useRef(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Main Cup Animation
-      gsap.to(imageRef.current, {
+      // 3D Scene Animation (Depth and Rotation)
+      gsap.to(sceneRef.current, {
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top 80%",
           end: "bottom 20%",
-          scrub: 1.5,
+          scrub: 1,
         },
-        y: -80,
-        rotationY: 45,
-        rotationX: 10,
-        scale: 1.15,
-        ease: "none",
+        z: 200, // Move to front
+        scale: 1.2,
+        y: -100,
+        rotationZ: 5,
+        ease: "power2.out",
       });
 
       // Ambient Glow Animation
@@ -32,9 +34,8 @@ export default function CoffeeSection() {
           end: "bottom 20%",
           scrub: 1,
         },
-        opacity: 0.6,
-        scale: 1.3,
-        ease: "none",
+        opacity: 0.8,
+        scale: 1.5,
       });
     }, containerRef);
     return () => ctx.revert();
@@ -49,27 +50,18 @@ export default function CoffeeSection() {
            SCA 85+ QUALITY
         </div>
 
-        <div className="lg:col-span-6 order-2 lg:order-1 relative" ref={containerRef}>
-          <div className="relative aspect-square flex items-center justify-center">
+        <div className="lg:col-span-6 order-2 lg:order-1 relative h-[600px]" ref={containerRef}>
+          <div className="relative w-full h-full flex items-center justify-center">
             
             {/* Environmental Glow */}
             <div 
               ref={glowRef}
-              className="absolute w-[60%] h-[60%] bg-orange-500/20 rounded-full blur-[120px] opacity-0 pointer-events-none"
+              className="absolute w-[60%] h-[60%] bg-orange-500/30 rounded-full blur-[150px] opacity-0 pointer-events-none"
             />
 
-            {/* The 3D Coffee Cup Wrapper */}
-            <div className="relative z-10 w-full max-w-[500px] perspective-[1000px]">
-              <motion.img 
-                ref={imageRef}
-                src="/images/3d-cup.png" 
-                alt="3D Rendered Premium Coffee Cup"
-                className="w-full h-auto object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 1.5, ease: "easeOut" }}
-              />
+            {/* The 3D Coffee Scene */}
+            <div ref={sceneRef} className="w-full h-full relative z-10 transition-transform duration-300">
+               <ThreeScene />
             </div>
 
             {/* Floating Accents */}

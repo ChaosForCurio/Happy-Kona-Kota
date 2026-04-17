@@ -4,20 +4,39 @@ import gsap from 'gsap';
 
 export default function CoffeeSection() {
   const imageRef = useRef(null);
+  const containerRef = useRef(null);
+  const glowRef = useRef(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      // Main Cup Animation
       gsap.to(imageRef.current, {
         scrollTrigger: {
-          trigger: imageRef.current,
-          start: "top 100%",
-          end: "bottom 0%",
-          scrub: true,
+          trigger: containerRef.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          scrub: 1.5,
         },
-        y: -100,
-        scale: 1.1,
+        y: -80,
+        rotationY: 45,
+        rotationX: 10,
+        scale: 1.15,
+        ease: "none",
       });
-    }, imageRef);
+
+      // Ambient Glow Animation
+      gsap.to(glowRef.current, {
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          scrub: 1,
+        },
+        opacity: 0.6,
+        scale: 1.3,
+        ease: "none",
+      });
+    }, containerRef);
     return () => ctx.revert();
   }, []);
 
@@ -30,40 +49,33 @@ export default function CoffeeSection() {
            SCA 85+ QUALITY
         </div>
 
-        <div className="lg:col-span-6 order-2 lg:order-1 relative group">
-          <motion.div
-            ref={imageRef}
-            initial={{ opacity: 0, y: 100 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
-            className="relative"
-          >
-            {/* The main coffee cup image */}
-            <div className="aspect-square rounded-2xl overflow-hidden border border-white/5 relative z-10">
-              <img 
-                src="/images/coffee-cup.jpg" 
-                alt="A premium cup of coffee with beautiful latte art"
-                className="w-full h-full object-cover transition-transform duration-2000 group-hover:scale-105"
+        <div className="lg:col-span-6 order-2 lg:order-1 relative" ref={containerRef}>
+          <div className="relative aspect-square flex items-center justify-center">
+            
+            {/* Environmental Glow */}
+            <div 
+              ref={glowRef}
+              className="absolute w-[60%] h-[60%] bg-orange-500/20 rounded-full blur-[120px] opacity-0 pointer-events-none"
+            />
+
+            {/* The 3D Coffee Cup Wrapper */}
+            <div className="relative z-10 w-full max-w-[500px] perspective-[1000px]">
+              <motion.img 
+                ref={imageRef}
+                src="/images/3d-cup.png" 
+                alt="3D Rendered Premium Coffee Cup"
+                className="w-full h-auto object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1.5, ease: "easeOut" }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A]/80 via-transparent to-transparent z-10" />
             </div>
 
-            {/* Floating Detail Image */}
-            <motion.div 
-               initial={{ x: 50, opacity: 0 }}
-               whileInView={{ x: 0, opacity: 1 }}
-               viewport={{ once: true }}
-               transition={{ delay: 0.5, duration: 1.2 }}
-               className="absolute -bottom-10 -right-10 w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden border-[10px] border-[#0A0A0A] z-20 hidden md:block"
-            >
-               <img 
-                 src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=400" 
-                 alt="Coffee Beans"
-                 className="w-full h-full object-cover"
-               />
-            </motion.div>
-          </motion.div>
+            {/* Floating Accents */}
+            <div className="absolute top-10 right-10 w-2 h-2 bg-orange-500 rounded-full animate-pulse opacity-20" />
+            <div className="absolute bottom-20 left-10 w-1 h-1 bg-white rounded-full animate-ping opacity-10" />
+          </div>
         </div>
 
         <div className="lg:col-span-6 order-1 lg:order-2 relative z-30">

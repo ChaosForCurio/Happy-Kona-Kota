@@ -6,6 +6,8 @@ import Marquee from '../components/Marquee';
 import BakerySection from '../components/BakerySection';
 import CoffeeSection from '../components/CoffeeSection';
 import Vibe from '../components/Vibe';
+import StorySection from '../components/StorySection';
+import Reservation from '../components/Reservation';
 import Footer from '../components/Footer';
 import SmoothScroll from '../components/SmoothScroll';
 import LoadingScreen from '../components/LoadingScreen';
@@ -21,7 +23,9 @@ export default function Home() {
           <Marquee />
           <BakerySection />
           <CoffeeSection />
+          <StorySection />
           <Vibe />
+          <Reservation />
         </main>
         <Footer />
       </div>

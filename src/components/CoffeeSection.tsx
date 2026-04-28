@@ -2,8 +2,6 @@ import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import gsap from 'gsap';
 
-import ThreeScene from './ThreeScene';
-
 export default function CoffeeSection() {
   const containerRef = useRef(null);
   const sceneRef = useRef(null);
@@ -11,7 +9,7 @@ export default function CoffeeSection() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // 3D Scene Animation (Depth and Rotation)
+      // Image Parallax/Scale Animation
       gsap.to(sceneRef.current, {
         scrollTrigger: {
           trigger: containerRef.current,
@@ -19,10 +17,8 @@ export default function CoffeeSection() {
           end: "bottom 20%",
           scrub: 1,
         },
-        z: 200, // Move to front
-        scale: 1.2,
-        y: -100,
-        rotationZ: 5,
+        scale: 1.1,
+        y: -50,
         ease: "power2.out",
       });
 
@@ -50,7 +46,7 @@ export default function CoffeeSection() {
            SCA 85+ QUALITY
         </div>
 
-        <div className="lg:col-span-6 order-2 lg:order-1 relative h-[600px]" ref={containerRef}>
+        <div className="lg:col-span-6 order-2 lg:order-1 relative h-[500px] md:h-[600px]" ref={containerRef}>
           <div className="relative w-full h-full flex items-center justify-center">
             
             {/* Environmental Glow */}
@@ -59,9 +55,14 @@ export default function CoffeeSection() {
               className="absolute w-[60%] h-[60%] bg-orange-500/30 rounded-full blur-[150px] opacity-0 pointer-events-none"
             />
 
-            {/* The 3D Coffee Scene */}
-            <div ref={sceneRef} className="w-full h-full relative z-10 transition-transform duration-300">
-               <ThreeScene />
+            {/* The Image replacing 3D Scene */}
+            <div ref={sceneRef} className="w-full h-full relative z-10 overflow-hidden rounded-2xl">
+               <img 
+                 src="https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&q=80&w=800" 
+                 alt="Specialty Coffee Pour"
+                 className="w-full h-full object-cover scale-110" 
+               />
+               <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-transparent to-transparent" />
             </div>
 
             {/* Floating Accents */}

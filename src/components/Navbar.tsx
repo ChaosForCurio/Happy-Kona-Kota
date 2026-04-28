@@ -1,35 +1,58 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
 
-const InstagramIcon = ({ size = 24 }: { size?: number }) => (
-  <svg 
-    width={size} 
-    height={size} 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round"
-  >
-    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-  </svg>
-);
+// Magnetic Button Component for the "MENU" and "CLOSE" buttons
+function Magnetic({ children }: { children: React.ReactElement }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+
+  const handleMouse = (e: React.MouseEvent) => {
+    if (!ref.current) return;
+    const { clientX, clientY } = e;
+    const { height, width, left, top } = ref.current.getBoundingClientRect();
+    const middleX = clientX - (left + width / 2);
+    const middleY = clientY - (top + height / 2);
+    setPosition({ x: middleX * 0.3, y: middleY * 0.3 });
+  };
+
+  const reset = () => {
+    setPosition({ x: 0, y: 0 });
+  };
+
+  const { x, y } = position;
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={handleMouse}
+      onMouseLeave={reset}
+      animate={{ x, y }}
+      transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 export default function Navbar() {
-  const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
+  // Hide Navbar on scroll down, Show on scroll up
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 100 && !isMenuOpen) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+      setLastScrollY(currentScrollY);
     };
-    window.addEventListener('scroll', handleScroll);
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [lastScrollY, isMenuOpen]);
 
   const navLinks = [
     { name: 'Bakery', href: '#bakery' },
@@ -40,88 +63,108 @@ export default function Navbar() {
 
   return (
     <>
-      <nav 
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 px-6 py-4 md:px-12 md:py-6 ${
-          isScrolled ? 'bg-white/80 backdrop-blur-md' : 'bg-transparent'
-        }`}
+      {/* Main Navbar */}
+      <motion.nav 
+        initial={{ y: 0 }}
+        animate={{ y: isVisible ? 0 : -100 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="fixed top-0 left-0 w-full z-50 px-6 py-6 md:px-12 pointer-events-none"
       >
-        <div className="max-w-screen-2xl mx-auto flex justify-between items-center">
-          <a href="#" className="flex flex-col">
-            <span className="font-playfair text-2xl md:text-3xl font-bold tracking-tight leading-none">
-              HAPPY KONA
-            </span>
-            <span className="font-outfit text-[10px] md:text-xs tracking-[0.3em] uppercase opacity-70">
-              Baking & Brewing Happiness
-            </span>
-          </a>
+        <div className="max-w-screen-2xl mx-auto grid grid-cols-3 items-center">
+          
+          {/* Left - Empty for balance */}
+          <div className="flex justify-start"></div>
 
-          <div className="hidden md:flex items-center space-x-12">
-            {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                className="font-outfit text-sm font-medium tracking-widest uppercase hover:text-orange-500 transition-colors"
-              >
-                {link.name}
-              </a>
-            ))}
-            <a 
-              href="https://www.instagram.com/happykonakota/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="p-2 bg-black text-white rounded-full hover:bg-orange-500 transition-colors"
-            >
-              <InstagramIcon size={20} />
+          {/* Center - Logo */}
+          <div className="flex justify-center pointer-events-auto">
+            <a href="#" className="flex flex-col items-center group mix-blend-multiply">
+              <img 
+                src="/logo.jpg" 
+                alt="Happy Kona Logo" 
+                className="h-20 md:h-24 object-contain transition-transform duration-500 group-hover:scale-105" 
+              />
             </a>
           </div>
 
-          <button 
-            className="md:hidden"
-            onClick={() => setIsMenuOpen(true)}
-          >
-            <Menu size={28} />
-          </button>
-        </div>
-      </nav>
+          {/* Right - Menu Button */}
+          <div className="flex justify-end pointer-events-auto">
+            <Magnetic>
+              <button 
+                onClick={() => setIsMenuOpen(true)}
+                className="font-outfit text-xs md:text-sm tracking-[0.2em] font-bold uppercase relative group px-6 py-3 bg-[#1A1A1A] text-white rounded-full hover:bg-orange-500 transition-colors shadow-lg border border-black/10 flex items-center justify-center"
+              >
+                <span>MENU</span>
+              </button>
+            </Magnetic>
+          </div>
 
+        </div>
+      </motion.nav>
+
+      {/* Full Screen Menu Overlay */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-[60] bg-white p-8 flex flex-col"
+            initial={{ y: '-100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '-100%' }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed inset-0 z-[100] bg-[#0A0A0A] text-white flex flex-col justify-between p-6 py-12 md:p-12 overflow-hidden"
           >
-            <div className="flex justify-between items-center mb-16">
-              <span className="font-playfair text-2xl font-bold">HAPPY KONA</span>
-              <button onClick={() => setIsMenuOpen(false)}>
-                <X size={32} />
-              </button>
+            {/* Background Vibe Image */}
+            <div className="absolute inset-0 z-0 opacity-10 pointer-events-none">
+              <img 
+                src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=2000" 
+                alt="Menu Vibe" 
+                className="w-full h-full object-cover grayscale"
+              />
+            </div>
+
+            {/* Menu Header */}
+            <div className="relative z-10 flex justify-between items-center max-w-screen-2xl mx-auto w-full">
+              <span className="font-playfair text-2xl md:text-3xl font-bold">HAPPY KONA</span>
+              <Magnetic>
+                <button 
+                  onClick={() => setIsMenuOpen(false)}
+                  className="font-outfit text-sm tracking-[0.2em] font-bold uppercase relative group p-4 text-orange-500"
+                >
+                  <span>CLOSE</span>
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-orange-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                </button>
+              </Magnetic>
             </div>
             
-            <div className="flex flex-col space-y-8">
-              {navLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  onClick={() => setIsMenuOpen(false)}
-                  className="font-playfair text-5xl font-bold hover:italic transition-all"
-                >
-                  {link.name}
-                </a>
+            {/* Menu Links with Staggered Reveal */}
+            <div className="relative z-10 flex flex-col justify-center items-center h-full space-y-4 md:space-y-8">
+              {navLinks.map((link, i) => (
+                <div key={link.name} className="overflow-hidden">
+                  <motion.a
+                    href={link.href}
+                    onClick={() => setIsMenuOpen(false)}
+                    initial={{ y: '100%' }}
+                    animate={{ y: 0 }}
+                    exit={{ y: '100%' }}
+                    transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.2 + (i * 0.1) }}
+                    className="block font-playfair text-5xl md:text-[8vw] font-black uppercase leading-none hover:italic hover:text-orange-500 transition-all cursor-pointer"
+                  >
+                    {link.name}
+                  </motion.a>
+                </div>
               ))}
             </div>
 
-            <div className="mt-auto flex justify-between items-center">
-              <span className="font-outfit text-sm tracking-widest uppercase opacity-50">KOTA, RAJASTHAN</span>
-              <a 
-                href="https://www.instagram.com/happykonakota/" 
-                className="flex items-center space-x-2 font-outfit text-sm font-bold"
-              >
-                <InstagramIcon size={18} />
-                <span>FOLLOW US</span>
-              </a>
+            {/* Menu Footer */}
+            <div className="relative z-10 flex justify-between items-end max-w-screen-2xl mx-auto w-full font-outfit text-[10px] md:text-sm tracking-widest uppercase opacity-60">
+              <div>
+                <p>123, Bakery Street</p>
+                <p>Kota, Rajasthan</p>
+              </div>
+              <div className="text-right">
+                <a href="https://www.instagram.com/happykonakota/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition-colors">Instagram</a>
+                <p className="mt-2">+91 98765 43210</p>
+              </div>
             </div>
+
           </motion.div>
         )}
       </AnimatePresence>
